@@ -1,0 +1,13 @@
+[package]
+name = "DockSprout"
+version = "0.2.0"
+edition = "2021"
+
+[[bin]]
+name = "sprout"
+path = "src/main.rs"
+
+[dependencies]
+gumdrop = "0.8.1"
+ignore = "0.4.23"
+walkdir = "2.4.0"
