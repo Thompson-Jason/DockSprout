@@ -4,6 +4,7 @@ use gumdrop::Options;
 use std::{env};
 use std::path::PathBuf;
 use std::process::{Command, Stdio, Output};
+use dock_sprout::run_docker_compose;
 
 
 
@@ -25,24 +26,6 @@ struct Opts {
 
 }
 
-fn run_docker_compose<F>(files: Vec<String>, direction_args: Vec<String>, mut command_runner: F)
-where
-    F: FnMut(&str, &Vec<String>) -> std::io::Result<std::process::Output>,
-{
-    for file_path in files.iter() {
-        
-        let output = command_runner(&file_path, &direction_args).unwrap();
-
-        let stdout = String::from_utf8(output.stdout).unwrap();
-        println!("stdout {}", stdout);
-
-        let stderr = String::from_utf8(output.stderr).unwrap();
-        println!("stderr {}", stderr);
-
-        println!("status {}", output.status);
-    }
-}
-
 fn real_docker_runner(file_path: &str, direction_args: &Vec<String>) -> std::io::Result<Output> {
     return Command::new("docker")
         .arg("compose")
@@ -51,7 +34,6 @@ fn real_docker_runner(file_path: &str, direction_args: &Vec<String>) -> std::io:
         .args(direction_args)
         .stdout(Stdio::piped())
         .output();
-        //.unwrap();
 }
 
 fn main() {
