@@ -1,0 +1,26 @@
+#[cfg(test)]
+mod tests {
+    use std::fs::{create_dir_all, File};
+    use tempfile::tempdir;
+    use dock_sprout::walker::get_compose_filepaths;
+
+    #[test]
+    fn test_find_docker_compose_files() {
+        // Create a temporary directory
+        let temp_dir = tempdir().unwrap();
+        let docker_dir = temp_dir.path().join("project1");
+        create_dir_all(&docker_dir).unwrap();
+
+        // Create a dummy docker-compose.yml file
+        let compose_file_path = docker_dir.join("docker-compose.yml");
+        File::create(&compose_file_path).unwrap();
+
+        // Call function and check results
+        let found_files = get_compose_filepaths(temp_dir.path());
+
+//        assert!(found_files.contains(&compose_file_path), "docker-compose.yml should be detected");
+        assert!(found_files.contains(&compose_file_path.to_string_lossy().to_string()), 
+            "docker-compose.yml should be detected");
+    }
+}
+
