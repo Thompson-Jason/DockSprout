@@ -1,6 +1,6 @@
 [package]
-name = "DockSprout"
-version = "0.2.0"
+name = "dock_sprout"
+version = "0.2.1"
 edition = "2021"
 
 [[bin]]
@@ -11,3 +11,6 @@ path = "src/main.rs"
 gumdrop = "0.8.1"
 ignore = "0.4.23"
 walkdir = "2.4.0"
+
+[dev-dependencies]
+tempfile = "3.16.0"
