@@ -16,14 +16,12 @@ use ignore::{Walk, WalkBuilder};
         return walker.build();
     }
 
-pub fn get_compose_filepaths(root: &Path) -> Vec<String> { //-> Vec<PathBuf> {
+pub fn get_compose_filepaths(root: &Path) -> Vec<String> {
     let mut paths = Vec::new();
     let walker = build_walker(root);
-    println!("root path : {}", root.to_string_lossy());
 
     for entry in walker {
         if let Err(_e) = entry {
-           // eprintln!("Error reading an entry: {}", e);
             continue;
         }
         let entry = entry.unwrap();
@@ -33,11 +31,8 @@ pub fn get_compose_filepaths(root: &Path) -> Vec<String> { //-> Vec<PathBuf> {
             if file_stem == "docker-compose" && (path.extension().map_or(false, |ext| ext == "yaml") || path.extension().map_or(false, |ext| ext == "yml")) {
                 println!("Path: {}", path.display());
                 paths.push(path.to_string_lossy().to_string());
-                //paths.push(path.to_path_buf());
             }
         }
-        //paths.push(path.to_path_buf());
     }
-    //Ok(paths);
     return paths;
 }

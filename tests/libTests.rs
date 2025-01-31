@@ -14,12 +14,12 @@ mod tests {
         let direction_args = vec!["up".to_string(), "-d".to_string()];
 
         // Mock function to replace the real Docker command
-        let mock_runner = |file: &str, _direction_args: &Vec<String>| -> std::io::Result<ExitStatus> {
+        let mock_runner = |file: &str, _direction_args: &Vec<String>, _verbose: bool| -> std::io::Result<ExitStatus> {
             println!("Mocked execution: docker compose -f {} up -d", file);
             Ok(ExitStatus::from_raw(0))
         };
 
-        run_docker_compose(test_files, direction_args, mock_runner);
+        run_docker_compose(test_files, direction_args, true, mock_runner);
     }
 
 
@@ -33,7 +33,7 @@ mod tests {
         let direction_args = vec!["up".to_string(), "-d".to_string()];
 
         // Mock function to replace the real Docker command
-        let mock_runner = |file: &str, _direction_args: &Vec<String>| -> std::io::Result<Child> {
+        let mock_runner = |file: &str, _direction_args: &Vec<String>, _verbose: bool| -> std::io::Result<Child> {
         println!("Mocked execution: docker compose -f {} up -d", file);
         Command::new("sleep")
             .arg("1") // A short-lived command that immediately exits
@@ -42,7 +42,7 @@ mod tests {
             .spawn() // Returns a Child process
         };
 
-        run_docker_compose_concurrent(test_files, direction_args, mock_runner);
+        run_docker_compose_concurrent(test_files, direction_args, true, mock_runner);
     }
 }
 
