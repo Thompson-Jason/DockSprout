@@ -42,7 +42,7 @@ mod tests {
 
         File::create(&compose_file_path1).unwrap();
         File::create(&compose_file_path2).unwrap();
-        File::create(&ignore_file_path).unwrap().write_all(b"project2/*");
+        let _ = File::create(&ignore_file_path).unwrap().write_all(b"project2/*");
 
         // Call function and check results
         let found_files = get_compose_filepaths(temp_dir.path());

@@ -3,7 +3,7 @@ mod walker;
 use gumdrop::Options;
 use std::{env};
 use std::path::PathBuf;
-use std::process::{Command, Stdio, Output};
+use std::process::{Command, Stdio, ExitStatus};
 use dock_sprout::run_docker_compose;
 
 
@@ -26,14 +26,16 @@ struct Opts {
 
 }
 
-fn real_docker_runner(file_path: &str, direction_args: &Vec<String>) -> std::io::Result<Output> {
+fn real_docker_runner(file_path: &str, direction_args: &Vec<String>) -> std::io::Result<ExitStatus> {
     return Command::new("docker")
         .arg("compose")
         .arg("-f")
         .arg(file_path)
         .args(direction_args)
-        .stdout(Stdio::piped())
-        .output();
+        //.stdout(Stdio::piped())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status();
 }
 
 fn main() {
