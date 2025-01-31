@@ -38,7 +38,7 @@ mod tests {
         let compose_file_path2 = ignore_dir.join("docker-compose.yml");
 
         // Create a dummy .compose-ignore file
-        let ignore_file_path = temp_dir.path().join(".compose-ignore");
+        let ignore_file_path = temp_dir.path().join(".sprout-ignore");
 
         File::create(&compose_file_path1).unwrap();
         File::create(&compose_file_path2).unwrap();

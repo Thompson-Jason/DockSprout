@@ -11,7 +11,7 @@ use ignore::{Walk, WalkBuilder};
             .git_ignore(true)
             .git_global(true)
             .git_exclude(true)
-            .add_custom_ignore_filename(".compose-ignore");
+            .add_custom_ignore_filename(".sprout-ignore");
     
         return walker.build();
     }
