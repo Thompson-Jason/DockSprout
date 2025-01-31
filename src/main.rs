@@ -81,7 +81,7 @@ fn real_docker_runner_concurrent(file_path: &str, direction_args: &Vec<String>, 
 
 fn main() {
     if env::args().any(|arg| arg == "-v" || arg == "--version") {
-        println!("DockerSprout {VERSION}");
+        println!("DockSprout {VERSION}");
         std::process::exit(0);
     }
 

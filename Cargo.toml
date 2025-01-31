@@ -1,6 +1,6 @@
 [package]
 name = "dock_sprout"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 authors = ["Jason Thompson <jason@jasonthompson.org>"]
 license = "MIT"
@@ -9,7 +9,7 @@ repository = "https://github.com/Thompson-Jason/DockSprout"
 description = """
 Rust CLI tool to bring up or down multiple docker-compose files from a parent directory.
 """
-categories = ["command-line-utilities", "docker"]
+categories = ["command-line-utilities"]
 keywords = ["docker", "docker-compose"]
 
 [[bin]]
