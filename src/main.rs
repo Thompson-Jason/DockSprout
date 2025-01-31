@@ -1,7 +1,9 @@
 mod walker;
 
 use gumdrop::Options;
+use indicatif::{ProgressBar, ProgressStyle};
 use std::{env};
+use std::time::Duration;       
 use std::path::PathBuf;
 use std::process::{Command, Stdio, ExitStatus, Child};
 use dock_sprout::{run_docker_compose, run_docker_compose_concurrent};
@@ -32,26 +34,49 @@ struct Opts {
 
 }
 
-fn real_docker_runner(file_path: &str, direction_args: &Vec<String>, ) -> std::io::Result<ExitStatus> {
-    return Command::new("docker")
-        .arg("compose")
-        .arg("-f")
-        .arg(file_path)
-        .args(direction_args)
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .status();
+fn real_docker_runner(file_path: &str, direction_args: &Vec<String>, verbose: bool) -> std::io::Result<ExitStatus> {
+    
+    if verbose {
+        return Command::new("docker")
+            .arg("compose")
+            .arg("-f")
+            .arg(file_path)
+            .args(direction_args)
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .status();
+    }else{
+        return Command::new("docker")
+            .arg("compose")
+            .arg("-f")
+            .arg(file_path)
+            .args(direction_args)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status();
+    }
 }
 
-fn real_docker_runner_concurrent(file_path: &str, direction_args: &Vec<String>) -> std::io::Result<Child> {
-    return Command::new("docker")
-        .arg("compose")
-        .arg("-f")
-        .arg(file_path)
-        .args(direction_args)
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .spawn();
+fn real_docker_runner_concurrent(file_path: &str, direction_args: &Vec<String>, verbose: bool) -> std::io::Result<Child> {
+    if verbose {
+        return Command::new("docker")
+            .arg("compose")
+            .arg("-f")
+            .arg(file_path)
+            .args(direction_args)
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .spawn();
+    }else{
+        return Command::new("docker")
+            .arg("compose")
+            .arg("-f")
+            .arg(file_path)
+            .args(direction_args)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn();
+    }
 }
 
 fn main() {
@@ -78,10 +103,19 @@ fn main() {
 
     let files = walker::get_compose_filepaths(&root);
 
+    let spinner = ProgressBar::new_spinner();
+    spinner.set_style(
+    ProgressStyle::default_spinner()
+        .tick_strings(&["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"])
+        .template("{spinner:.blue} Running {msg}...") // Custom styling
+        .unwrap(),
+    );
+    spinner.enable_steady_tick(Duration::from_millis(100));
+
     if args.concurrent {
-        run_docker_compose_concurrent(files, direction_args, real_docker_runner_concurrent);
+        run_docker_compose_concurrent(files, direction_args, args.verbose, real_docker_runner_concurrent);
     }else{
-        run_docker_compose(files, direction_args, real_docker_runner);
+        run_docker_compose(files, direction_args, args.verbose, real_docker_runner);
     }
 }
 
