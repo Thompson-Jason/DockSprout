@@ -3,8 +3,8 @@ mod walker;
 use gumdrop::Options;
 use std::{env};
 use std::path::PathBuf;
-use std::process::{Command, Stdio, ExitStatus};
-use dock_sprout::run_docker_compose;
+use std::process::{Command, Stdio, ExitStatus, Child};
+use dock_sprout::{run_docker_compose, run_docker_compose_concurrent};
 
 
 
@@ -24,18 +24,34 @@ struct Opts {
     #[options(help = "docker-compose option (one of: up|down)", free, required)]
     direction: String,
 
+    #[options(help = "Runs the docker compose commands concurrently", default = "false")]
+    concurrent: bool,
+
+    #[options(help = "Output docker compose output to stdout", no_short, default = "false")]
+    verbose: bool,
+
 }
 
-fn real_docker_runner(file_path: &str, direction_args: &Vec<String>) -> std::io::Result<ExitStatus> {
+fn real_docker_runner(file_path: &str, direction_args: &Vec<String>, ) -> std::io::Result<ExitStatus> {
     return Command::new("docker")
         .arg("compose")
         .arg("-f")
         .arg(file_path)
         .args(direction_args)
-        //.stdout(Stdio::piped())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status();
+}
+
+fn real_docker_runner_concurrent(file_path: &str, direction_args: &Vec<String>) -> std::io::Result<Child> {
+    return Command::new("docker")
+        .arg("compose")
+        .arg("-f")
+        .arg(file_path)
+        .args(direction_args)
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .spawn();
 }
 
 fn main() {
@@ -62,6 +78,10 @@ fn main() {
 
     let files = walker::get_compose_filepaths(&root);
 
-    run_docker_compose(files, direction_args, real_docker_runner);
+    if args.concurrent {
+        run_docker_compose_concurrent(files, direction_args, real_docker_runner_concurrent);
+    }else{
+        run_docker_compose(files, direction_args, real_docker_runner);
+    }
 }
 
