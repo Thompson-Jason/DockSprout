@@ -24,3 +24,8 @@ walkdir = "2.4.0"
 
 [dev-dependencies]
 tempfile = "3.16.0"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
