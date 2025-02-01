@@ -13,6 +13,10 @@
 
 ---
 ## **🛠 Installation** 
+
+1. Install Rust toolchain <https://www.rust-lang.org/tools/install>
+2. Run `cargo install dock_sprout`
+
 ### **🔹 Build from Source** 
 ```bash 
 git clone https://github.com/Thompson-Jason/DockSprout.git
@@ -28,4 +32,16 @@ cargo build --release
 ## 🔹 **Example**:
 `sprout ~/my-docker-projects up`
 
+```
+─── my-docker-projects
+    ├── LubeLogger/
+    │   └── docker-compose.yml
+    ├── ntfy/
+    │   └── docker-compose.yaml
+    ├── Portainer/
+    │    ├── docker-compose.yaml
+    │    └──.conf
+    └── .sprout-ignore
+```
 
+This will bring up all three containers separately allowing for the esability of one command to bring all of your containers up and none of the downsides of a mono compose file.

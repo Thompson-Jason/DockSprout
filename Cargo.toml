@@ -1,7 +1,16 @@
 [package]
 name = "dock_sprout"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
+authors = ["Jason Thompson <jason@jasonthompson.org>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/Thompson-Jason/DockSprout"
+description = """
+Rust CLI tool to bring up or down multiple docker-compose files from a parent directory.
+"""
+categories = ["command-line-utilities"]
+keywords = ["docker", "docker-compose"]
 
 [[bin]]
 name = "sprout"
@@ -15,3 +24,8 @@ walkdir = "2.4.0"
 
 [dev-dependencies]
 tempfile = "3.16.0"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
