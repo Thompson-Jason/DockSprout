@@ -3,7 +3,6 @@ mod walker;
 use gumdrop::Options;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::{env};
-use std::io::stderr;
 use std::time::Duration;
 use std::path::PathBuf;
 use std::process::{Command, Stdio, ExitStatus, Child};
