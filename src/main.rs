@@ -3,7 +3,7 @@ mod walker;
 use gumdrop::Options;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::{env};
-use std::time::Duration;       
+use std::time::Duration;
 use std::path::PathBuf;
 use std::process::{Command, Stdio, ExitStatus, Child};
 use dock_sprout::{run_docker_compose, run_docker_compose_concurrent};
@@ -23,8 +23,8 @@ struct Opts {
     #[options(help = "Get docker-compose files from this source recursivly", free, required)]
     source: Option<PathBuf>,
 
-    #[options(help = "docker-compose option (one of: up|down)", free, required)]
-    direction: String,
+    #[options(help = "docker-compose option (one of: up|down|pull)", free, required)]
+    option: String,
 
     #[options(help = "Runs the docker compose commands concurrently", default = "false")]
     concurrent: bool,
@@ -88,17 +88,17 @@ fn main() {
 
     let args = Opts::parse_args_default_or_exit();
     let root = args.source.unwrap();
-    let direction = args.direction.to_lowercase();
+    let option = args.option.to_lowercase();
     let mut direction_args = vec![];
 
 
-    if direction != "up" && direction != "down" {
-        eprintln!("Docker Compose direction has to be one of the following (up|down). Argument given = {}", direction);
+    if option != "up" && option != "down" && option != "pull" {
+        eprintln!("Docker Compose direction has to be one of the following (up|down|pull). Argument given = {}", option);
         std::process::exit(1);
-    }else if direction == "up" {
-        direction_args = vec![direction, "-d".to_string()];
-    }else if direction == "down" {
-        direction_args = vec![direction];
+    }else if option == "up" {
+        direction_args = vec![option, "-d".to_string()];
+    }else if option == "down" || option == "pull"{
+        direction_args = vec![option];
     }
 
     let files = walker::get_compose_filepaths(&root);
