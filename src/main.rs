@@ -20,7 +20,7 @@ struct Opts {
     #[options(help = "Display version information")]
     version: bool,
 
-    #[options(help = "Get docker-compose files from this source recursivly", free, required)]
+    #[options(help = "Get docker-compose files from this source recursively", free, required)]
     source: Option<PathBuf>,
 
     #[options(help = "docker-compose option (one of: up|down|pull)", free, required)]
@@ -37,45 +37,45 @@ struct Opts {
 fn real_docker_runner(file_path: &str, direction_args: &Vec<String>, verbose: bool) -> std::io::Result<ExitStatus> {
     
     if verbose {
-        return Command::new("docker")
+        Command::new("docker")
             .arg("compose")
             .arg("-f")
             .arg(file_path)
             .args(direction_args)
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .status();
+            .status()
     }else{
-        return Command::new("docker")
+        Command::new("docker")
             .arg("compose")
             .arg("-f")
             .arg(file_path)
             .args(direction_args)
             .stdout(Stdio::null())
             .stderr(Stdio::null())
-            .status();
+            .status()
     }
 }
 
 fn real_docker_runner_concurrent(file_path: &str, direction_args: &Vec<String>, verbose: bool) -> std::io::Result<Child> {
     if verbose {
-        return Command::new("docker")
+        Command::new("docker")
             .arg("compose")
             .arg("-f")
             .arg(file_path)
             .args(direction_args)
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .spawn();
+            .spawn()
     }else{
-        return Command::new("docker")
+        Command::new("docker")
             .arg("compose")
             .arg("-f")
             .arg(file_path)
             .args(direction_args)
             .stdout(Stdio::null())
             .stderr(Stdio::null())
-            .spawn();
+            .spawn()
     }
 }
 

@@ -13,7 +13,7 @@ use ignore::{Walk, WalkBuilder};
             .git_exclude(true)
             .add_custom_ignore_filename(".sprout-ignore");
     
-        return walker.build();
+        walker.build()
     }
 
 pub fn get_compose_filepaths(root: &Path) -> Vec<String> {
@@ -34,5 +34,5 @@ pub fn get_compose_filepaths(root: &Path) -> Vec<String> {
             }
         }
     }
-    return paths;
+    paths
 }
