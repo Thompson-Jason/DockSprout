@@ -11,6 +11,7 @@ Rust CLI tool to bring up or down multiple docker-compose files from a parent di
 """
 categories = ["command-line-utilities"]
 keywords = ["docker", "docker-compose"]
+homepage = "https://github.com/Thompson-Jason/DockSprout"
 
 [[bin]]
 name = "sprout"
