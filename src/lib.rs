@@ -6,7 +6,7 @@ where
 {
     for file_path in files.iter() {
 
-        command_runner(&file_path, &direction_args, verbose).unwrap();
+        command_runner(file_path, &direction_args, verbose).unwrap();
     }
 }
 
@@ -16,6 +16,6 @@ where
 {
     for file_path in files.iter() {
 
-        command_runner(&file_path, &direction_args, verbose).unwrap();
+        command_runner(file_path, &direction_args, verbose).unwrap();
     }
 }
