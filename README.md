@@ -17,6 +17,11 @@
 1. Install Rust toolchain <https://www.rust-lang.org/tools/install>
 2. Run `cargo install dock_sprout`
 
+### **🔹 Homebrew**
+```bash 
+brew install Thompson-Jason/tap/dock_sprout
+```
+
 ### **🔹 Build from Source** 
 ```bash 
 git clone https://github.com/Thompson-Jason/DockSprout.git
