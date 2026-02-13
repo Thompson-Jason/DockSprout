@@ -1,4 +1,5 @@
 mod walker;
+mod signal;
 
 use gumdrop::Options;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -6,7 +7,10 @@ use std::{env};
 use std::time::Duration;
 use std::path::PathBuf;
 use std::process::{Command, Stdio, ExitStatus, Child};
-use dock_sprout::{run_docker_compose, run_docker_compose_concurrent};
+use std::sync::{Arc, Mutex};
+use std::sync::atomic::AtomicBool;
+use log::error;
+// ...existing code...
 
 
 
@@ -34,8 +38,11 @@ struct Opts {
 
 }
 
-fn real_docker_runner(file_path: &str, direction_args: &Vec<String>, verbose: bool) -> std::io::Result<ExitStatus> {
+fn real_docker_runner(file_path: &str, direction_args: &[String], verbose: bool) -> std::io::Result<ExitStatus> {
     
+    if file_path.contains(';') || file_path.contains('&') || file_path.contains('|') || file_path.contains('`') || file_path.contains('$') {
+        return Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid characters in file path"));
+    }
     if verbose {
         Command::new("docker")
             .arg("compose")
@@ -45,7 +52,7 @@ fn real_docker_runner(file_path: &str, direction_args: &Vec<String>, verbose: bo
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .status()
-    }else{
+    } else {
         Command::new("docker")
             .arg("compose")
             .arg("-f")
@@ -57,7 +64,11 @@ fn real_docker_runner(file_path: &str, direction_args: &Vec<String>, verbose: bo
     }
 }
 
-fn real_docker_runner_concurrent(file_path: &str, direction_args: &Vec<String>, verbose: bool) -> std::io::Result<Child> {
+fn real_docker_runner_concurrent(file_path: &str, direction_args: &[String], verbose: bool) -> std::io::Result<Child> {
+    // Security: Validate file_path to prevent command injection
+    if file_path.contains(';') || file_path.contains('&') || file_path.contains('|') || file_path.contains('`') || file_path.contains('$') {
+        return Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid characters in file path"));
+    }
     if verbose {
         Command::new("docker")
             .arg("compose")
@@ -67,7 +78,7 @@ fn real_docker_runner_concurrent(file_path: &str, direction_args: &Vec<String>, 
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .spawn()
-    }else{
+    } else {
         Command::new("docker")
             .arg("compose")
             .arg("-f")
@@ -80,42 +91,71 @@ fn real_docker_runner_concurrent(file_path: &str, direction_args: &Vec<String>, 
 }
 
 fn main() {
+    env_logger::init();
     if env::args().any(|arg| arg == "-v" || arg == "--version") {
         println!("DockSprout {VERSION}");
         std::process::exit(0);
     }
 
-
     let args = Opts::parse_args_default_or_exit();
-    let root = args.source.unwrap();
+    let root = match args.source {
+        Some(r) => r,
+        None => {
+            error!("No source directory provided.");
+            std::process::exit(1);
+        }
+    };
     let option = args.option.to_lowercase();
-    let mut direction_args = vec![];
-
-
-    if option != "up" && option != "down" && option != "pull" {
-        eprintln!("Docker Compose direction has to be one of the following (up|down|pull). Argument given = {}", option);
+    let direction_args = if option != "up" && option != "down" && option != "pull" {
+        error!("Docker Compose direction has to be one of the following (up|down|pull). Argument given = {}", option);
         std::process::exit(1);
-    }else if option == "up" {
-        direction_args = vec![option, "-d".to_string()];
-    }else if option == "down" || option == "pull"{
-        direction_args = vec![option];
-    }
+    } else if option == "up" {
+        vec![option, "-d".to_string()]
+    } else {
+        vec![option]
+    };
 
     let files = walker::get_compose_filepaths(&root);
 
+    if files.is_empty() {
+        error!("No docker-compose.yml files found in {:?}", root);
+        std::process::exit(1);
+    }
+
+    // Spinner is used for visual feedback, but does not track per-file progress
     let spinner = ProgressBar::new_spinner();
     spinner.set_style(
-    ProgressStyle::default_spinner()
-        .tick_strings(&["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"])
-        .template("{spinner:.blue} Running {msg}...") // Custom styling
-        .unwrap(),
+        ProgressStyle::default_spinner()
+            .tick_strings(&["\u{280b}", "\u{2819}", "\u{2839}", "\u{2838}", "\u{283c}", "\u{2834}", "\u{2826}", "\u{2827}", "\u{2807}", "\u{280f}"])
+            .template("{spinner:.blue} Running {msg}...")
+            .unwrap(),
     );
     spinner.enable_steady_tick(Duration::from_millis(100));
 
     if args.concurrent {
-        run_docker_compose_concurrent(files, direction_args, args.verbose, real_docker_runner_concurrent);
-    }else{
-        run_docker_compose(files, direction_args, args.verbose, real_docker_runner);
+        // ...existing code...
+        let children = Arc::new(Mutex::new(Vec::new()));
+        let shutdown_flag = Arc::new(AtomicBool::new(false));
+        signal::setup_signal_handler(Arc::clone(&children), Arc::clone(&shutdown_flag));
+        let errors = dock_sprout::run_docker_compose_concurrent_collect(files, &direction_args, args.verbose, real_docker_runner_concurrent, Arc::clone(&children), Arc::clone(&shutdown_flag));
+        spinner.finish_and_clear();
+        if !errors.is_empty() {
+            error!("Some docker compose commands failed:");
+            for (file, err) in errors {
+                error!("  {}: {}", file, err);
+            }
+            std::process::exit(2);
+        }
+    } else {
+        let errors = dock_sprout::run_docker_compose_collect(files, &direction_args, args.verbose, real_docker_runner);
+        spinner.finish_and_clear();
+        if !errors.is_empty() {
+            error!("Some docker compose commands failed:");
+            for (file, err) in errors {
+                error!("  {}: {}", file, err);
+            }
+            std::process::exit(2);
+        }
     }
 }
 
