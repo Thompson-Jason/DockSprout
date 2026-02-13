@@ -1,9 +1,10 @@
-# DockSprout 🌱🐳
+
+# DockSprout
 
 **A simple CLI tool to bring up Docker containers from multiple `docker-compose.yml` files in subdirectories.**
 
 ---
-## **📌 Features**
+## **Features**
 
 - Scans a **central directory** for `docker-compose.yml` files.
 - Recursively searches **subdirectories** for Docker Compose projects.
@@ -17,12 +18,12 @@
 1. Install Rust toolchain <https://www.rust-lang.org/tools/install>
 2. Run `cargo install dock_sprout`
 
-### **🔹 Homebrew**
+### **Homebrew**
 ```bash 
 brew install Thompson-Jason/tap/dock_sprout
 ```
 
-### **🔹 Build from Source** 
+### **Build from Source**
 ```bash 
 git clone https://github.com/Thompson-Jason/DockSprout.git
 cd DockSprout
@@ -30,12 +31,40 @@ cargo build --release
 ```
 
 ---
-## **🚀 Usage**
+## **Usage**
 
-`sprout <root-directory> <docker-compose-direction>`
 
-## 🔹 **Example**:
-`sprout ~/my-docker-projects up`
+### **Basic Usage**
+```
+sprout <root-directory> <docker-compose-direction>
+```
+
+### **Options**
+
+- `--concurrent` : Run all docker compose commands in parallel (faster for many projects)
+- `--verbose`    : Output docker compose logs to stdout/stderr
+
+## **Examples**
+
+**Bring up all containers, sequentially:**
+```
+sprout ~/my-docker-projects up
+```
+
+**Bring up all containers concurrently:**
+```
+sprout --concurrent ~/my-docker-projects up
+```
+
+**Bring up all containers and show all output:**
+```
+sprout --verbose ~/my-docker-projects up
+```
+
+**Bring down all containers concurrently and show output:**
+```
+sprout --concurrent --verbose ~/my-docker-projects down
+```
 
 ```
 ─── my-docker-projects
